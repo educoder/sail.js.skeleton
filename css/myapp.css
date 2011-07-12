@@ -1,0 +1,37 @@
+/* 
+    Your app's CSS goes here.
+    
+    --> rename this file to yourappname.css and 
+        change the corresponding <link> in index.html
+*/
+
+#connecting {
+  position: absolute;
+  top: 40%;
+  left: 40%;
+  right: 40%;
+  text-align: center;
+  font-weight: bold;
+}
+
+#hello-world {
+  font-size: 2.5em;
+  margin: 10%;
+  text-align: center;
+  font-family: Georgia, serif;
+  color: #00b;
+  font-weight: bold;
+  color: white;
+  padding: 10px;
+}
+
+#welcome {
+  font-size: 2.5em;
+  margin: 10%;
+  text-align: center;
+  font-family: Georgia, serif;
+  color: #00b;
+  font-weight: bold;
+  color: white;
+  padding: 10px;
+}
