@@ -69,6 +69,14 @@ MyApp = {
             //   {"eventType":"my_event"}
             my_event: function(ev, sev) {
             },
+            
+            // another way to respond to sail events it to map them onto local events.
+            // the following code would cause the 'foo' sail event to trigger the local
+            // 'foobar' event -- you would also set up an 'onFoobar' event handler 
+            // further down (under the events hash, outside of events.sail);
+            // in this case the onFoobar event handler would receive two arguments:
+            // a standard javascript event (`ev`) and the sail event (`sev`)
+            foo: 'foobar'
         },
         
         
@@ -101,5 +109,13 @@ MyApp = {
         onAnotherLocalEvent: function(ev) {
             
         },
+        
+        // sail event mapped to local event -- see the explenation above for "foo: 'foobar'".
+        // `ev` is a standard javascript event object (for the most part you can probably just
+        // ignore this, as it doesn't contain much useful data); `sev` is the sail event object,
+        // with the typical sail event fiels like `sev.eventType` and `sev.payload`.
+        onFoobar: function(ev, sev) {
+            
+        }
     }
 }
