@@ -53,7 +53,7 @@ MyApp = {
             // this intercepts an event in XMPP groupchat that looks like this:
             //
             //   {"eventType":"here","payload":{"who":"test1"}}
-            here: function(ev, sev) {
+            here: function(sev) {
                 payload = sev.payload
                 
                 $('#welcome').text("Welcome "+payload.who+"!")
