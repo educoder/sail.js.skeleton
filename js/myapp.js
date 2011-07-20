@@ -12,34 +12,52 @@
 MyApp = {
     xmppDomain: 'proto.encorelab.org',
     groupchatRoom: 's3@conference.proto.encorelab.org',
+    rollcallURL: 'http://rollcall.proto.encorelab.org',
+    //rollcallURL: 'http://localhost:3000',
+    //rollcallURL: 'http://localhost:8000/rollcall',
     
     // this is called in index.html
     init: function() {
         console.log("Initializing...")
         
-        // enable's simple username-password authentication
-        Sail.enable(MyApp, 'simple-auth')
-        
-        // takes care of event-binding magic... don't touch
-        Sail.autobindEvents(MyApp)
-        
-        MyApp.authenticate()
+        Sail.modules
+            .load('Strophe.AutoConnector')
+            .load('Rollcall.LoginPicker')
+            .load('AuthIndicator')
+            .thenRun(function () {
+                // takes care of event-binding magic... don't touch this
+                Sail.autobindEvents(MyApp)
+                
+                console.log("Initialized.")
+                $(Sail.app).trigger('initialized')
+                return true
+            })
     },
     
     authenticate: function() {
         console.log("Authenticating...")
         
-        MyApp.username = prompt("Enter your username:")
-
-        MyApp.password = prompt("Enter your password:")
-        MyApp.session = {
-            account: {
-                login: MyApp.username,
-                password: MyApp.password
-            }
+        // Note that we use Rollcall for authentication here.
+        // See: https://github.com/educoder/rollcall
+        
+        MyApp.rollcall = new Rollcall.Client(MyApp.rollcallURL)
+        MyApp.token = MyApp.rollcall.getCurrentToken()
+        
+        if (!MyApp.token) {
+            Rollcall.LoginPicker.showUserSelector()
+        } else {
+            MyApp.rollcall.fetchSessionForToken(MyApp.token, function(data) {
+                MyApp.session = data.session
+                $(MyApp).trigger('authenticated')
+            })
         }
-
-        $(MyApp).trigger('authenticated')
+    },
+    
+    unauthenticate: function() {
+        MyApp.rollcall.destroySessionForToken(MyApp.rollcall.getCurrentToken(), function() {
+            MyApp.rollcall.unsetToken()
+            $(MyApp).trigger('unauthenticated')
+        })
     },
     
     events: {
@@ -49,11 +67,11 @@ MyApp = {
                --> add additional XMPP-based event handlers for your app here
             */
             
-            // triggered via sail (XMPP) event generated in onSelfJoined...
+            // triggered via sail (XMPP) event generated in selfJoined...
             // this intercepts an event in XMPP groupchat that looks like this:
             //
             //   {"eventType":"here","payload":{"who":"test1"}}
-            here: function(ev, sev) {
+            here: function(sev) {
                 payload = sev.payload
                 
                 $('#welcome').text("Welcome "+payload.who+"!")
@@ -72,9 +90,9 @@ MyApp = {
             
             // another way to respond to sail events it to map them onto local events.
             // the following code would cause the 'foo' sail event to trigger the local
-            // 'foobar' event -- you would also set up an 'onFoobar' event handler 
+            // 'foobar' event -- you would also set up an 'foobar' event handler 
             // further down (under the events hash, outside of events.sail);
-            // in this case the onFoobar event handler would receive two arguments:
+            // in this case the foobar event handler would receive two arguments:
             // a standard javascript event (`ev`) and the sail event (`sev`)
             foo: 'foobar'
         },
@@ -85,10 +103,14 @@ MyApp = {
            --> add additional local event handlers for your app here
         */
         
+        initialized: function(ev) {
+            MyApp.authenticate()
+        },
+        
         // this is triggered by $(MyApp).trigger('connected')
         // in sail.js after the user passes authentication and
         // connects to the XMPP server
-        onConnected: function(ev) {
+        connected: function(ev) {
             $('#username').text(session.account.login)
       	    $('#connecting').hide()
             
@@ -97,16 +119,16 @@ MyApp = {
         
         // this is triggered by $(MyApp).trigger('selfJoined')
         // in sail.js after the user joins the groupchat (after 'connected')
-        onSelfJoined: function(ev) {
+        selfJoined: function(ev) {
             // example of how to trigger a sail event
             // note that this will be handled by event.sail.here (further up in this file)
-            sev = new Sail.Event('here', {who: MyApp.username})
+            sev = new Sail.Event('here', {who: MyApp.session.account.login})
             MyApp.groupchat.sendEvent(sev)
         },
         
         
         // this would be triggered by $(MyApp).trigger('anotherLocalEvent')
-        onAnotherLocalEvent: function(ev) {
+        anotherLocalEvent: function(ev) {
             
         },
         
@@ -114,8 +136,13 @@ MyApp = {
         // `ev` is a standard javascript event object (for the most part you can probably just
         // ignore this, as it doesn't contain much useful data); `sev` is the sail event object,
         // with the typical sail event fiels like `sev.eventType` and `sev.payload`.
-        onFoobar: function(ev, sev) {
+        foobar: function(ev, sev) {
             
+        },
+        
+        // triggered in MyApp.unauthenticate once the user has been unauthenticated
+        unauthenticated: function(ev) {
+            document.location.reload()
         }
     }
 }
