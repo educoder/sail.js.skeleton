@@ -17,6 +17,7 @@
 #hello-world {
   font-size: 2.5em;
   margin: 10%;
+  margin-bottom: 1em;
   text-align: center;
   font-family: Georgia, serif;
   color: #00b;
@@ -28,10 +29,12 @@
 #welcome {
   font-size: 2.5em;
   margin: 10%;
+  margin-top: 0;
   text-align: center;
   font-family: Georgia, serif;
   color: #00b;
   font-weight: bold;
   color: white;
   padding: 10px;
+  background: #060;
 }
