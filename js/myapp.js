@@ -21,9 +21,9 @@ MyApp = {
         console.log("Initializing...")
         
         Sail.modules
-            .load('Strophe.AutoConnector')
-            .load('Rollcall.LoginPicker')
+            .load('Rollcall.Authenticator', {mode: 'picker'})
             .load('AuthIndicator')
+            .load('Strophe.AutoConnector')
             .thenRun(function () {
                 // takes care of event-binding magic... don't touch this
                 Sail.autobindEvents(MyApp)
@@ -44,20 +44,13 @@ MyApp = {
         MyApp.token = MyApp.rollcall.getCurrentToken()
         
         if (!MyApp.token) {
-            Rollcall.LoginPicker.showUserSelector()
+            Rollcall.Authenticator.requestLogin()
         } else {
             MyApp.rollcall.fetchSessionForToken(MyApp.token, function(data) {
                 MyApp.session = data.session
                 $(MyApp).trigger('authenticated')
             })
         }
-    },
-    
-    unauthenticate: function() {
-        MyApp.rollcall.destroySessionForToken(MyApp.rollcall.getCurrentToken(), function() {
-            MyApp.rollcall.unsetToken()
-            $(MyApp).trigger('unauthenticated')
-        })
     },
     
     events: {
@@ -111,6 +104,8 @@ MyApp = {
         // in sail.js after the user passes authentication and
         // connects to the XMPP server
         connected: function(ev) {
+      	    Sail.app.groupchat.join()
+            
             $('#username').text(session.account.login)
       	    $('#connecting').hide()
             
