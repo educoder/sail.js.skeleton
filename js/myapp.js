@@ -22,7 +22,7 @@ MyApp = {
         
         Sail.modules
             .load('Rollcall.Authenticator', {mode: 'picker'})
-            .load('AuthIndicator')
+            .load('AuthStatusWidget')
             .load('Strophe.AutoConnector')
             .thenRun(function () {
                 // takes care of event-binding magic... don't touch this
