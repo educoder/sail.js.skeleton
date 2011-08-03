@@ -1,9 +1,9 @@
 /* 
     Your app's JS goes here.
     
-    --> rename this file to yourappname.css and 
-        change .then('js/myapp.js') in index.html
-        appropriately
+    --> rename this file to yourappname.js and 
+        change .then('js/myapp.js') in index.html to 
+        .then('js/yourappname.js')
         
     --> change all occurances of "MyApp" in this file
         to your app's actual name! (preferrably camel-cased)
